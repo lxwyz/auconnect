@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema(
     year: { type: Number, required: true },
     createdAt: Date,
     updatedAt: Date,
+    otp: String,
+    otpExpiry: Date,
   },
   { timestamps: true }
 );
