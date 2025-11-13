@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -43,11 +42,14 @@ const userSchema = new mongoose.Schema(
     // updatedAt: Date,
     otp: String,
     otpExpiry: Date,
-    role:{ 
+    role: {
       type: String,
-       enum: ["Admin","User"],
-      default: "User"}
+      enum: ["Admin", "User"],
+      default: "User",
+    },
+    status: { type: String, enum: ["Pending", "Active"], default: "Pending" },
   },
+
   { timestamps: true }
 );
 

@@ -4,6 +4,9 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import userRouter from "./routes/userRouter.js";
 
+// Utils
+import { globalErrorHandler } from "./utils/errorHandler.js";
+
 dotenv.config();
 const app = express();
 
@@ -17,6 +20,10 @@ app.use(cors());
 // API routes
 app.use("/api/user", userRouter);
 
+// Handle Generic Error
+app.use(globalErrorHandler);
+
+//  Test Route
 app.get("/", (req, res) => {
   res.send("API is working well.");
 });
