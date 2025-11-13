@@ -24,68 +24,86 @@ const registerUser = async (req, res) => {
     } = req.body;
 
     if (!studentId || !name || !email || !password) {
-      return res.json({
-        success: false,
-        message: "Please fill all the required fields.",
-      });
+      return sendError(
+        res,
+        messages.MISSING_CREDENTIAL,
+        400,
+        "studentID, Name , Email And Password Are Require."
+      );
     }
 
     if (!validator.isEmail(email) || !email.endsWith("@au.edu")) {
-      return res.json({
-        success: false,
-        message: "Only Assumption University email is allowed.",
-      });
+      return sendError(
+        res,
+        messages.INVALID_CREDENTIAL,
+        401,
+        "Only AU Email is Allowed"
+      );
     }
 
     if (password.length < 8) {
-      return res.json({
-        success: false,
-        message: "Password must be at least 8 characters.",
-      });
+      return sendError(
+        res,
+        messages.INVALID_CREDENTIAL,
+        401,
+        "Password must be at least 8 characters."
+      );
     }
 
     const existingUser = await userModel.findOne({ email });
+
     if (existingUser) {
-      return res.json({
-        success: false,
-        message: "Email already registered.",
+      if (existingUser.status === "Active") {
+        return sendError(res, messages.EMAIL_TAKEN, 401);
+      } else if (existingUser.status === "Pending") {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5minutes.
+
+        const salt = await bcrypt.genSalt(10);
+        const hashPassword = await bcrypt.hash(password, salt);
+
+        existingUser.studentId = studentId;
+        existingUser.name = name;
+        existingUser.password = hashPassword;
+        existingUser.otp = otp;
+        existingUser.otpExpiry = otpExpiry;
+        await existingUser.save();
+
+        // 8️⃣ Send OTP email
+        await sendOtpEmail(email, otp);
+        return sendSuccess(res, messages.OTP_SENT);
+      }
+    } else {
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5minutes.
+
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(password, salt);
+
+      const newUser = new userModel({
+        studentId,
+        name,
+        email,
+        // faculty,
+        // dob,
+        // phone,
+        // address,
+        // year,
+        password: hashPassword,
+        otp,
+        otpExpiry,
       });
+
+      const user = await newUser.save();
+      // 8️⃣ Send OTP email
+      await sendOtpEmail(email, otp);
+
+      return sendSuccess(res, messages.OTP_SENT);
     }
-
-    // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5minutes.
-
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new userModel({
-      studentId,
-      name,
-      email,
-      // faculty,
-      // dob,
-      // phone,
-      // address,
-      // year,
-      password: hashPassword,
-      otp,
-      otpExpiry,
-    });
-
-    const user = await newUser.save();
-
-    // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    //   expiresIn: "7d",
-    // });
-
-    // 8️⃣ Send OTP email
-    await sendOtpEmail(email, otp);
-
-    res.json({ success: true, message: "OTP sent to your email." });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    sendError(res, messages.INTERNAL_ERROR, 500, error);
   }
 };
 
@@ -110,6 +128,7 @@ const verifyOtp = async (req, res) => {
     //clear OTP fields after successful verification.
     user.otp = null;
     user.otpExpiry = null;
+    user.status = "Active";
     await user.save();
 
     // Generate JWT

@@ -3,6 +3,7 @@ const messages = {
   INVALID_REQUEST: "Invalid Request",
   INVALID_CREDENTIAL: "Invalid Credential",
 
+  MISSING_CREDENTIAL: "Please fill all the required fields.",
   MISSING_USERNAME: "Please enter a username.",
   MISSING_PASSWORD: "Please enter a password.",
 
@@ -12,6 +13,11 @@ const messages = {
   ACCOUNT_DELETED: "Account deleted successfully.",
   USER_RETRIEVED: "User retrieved successfully.",
   USER_UPDATED: "User updated successfully.",
+
+  // Email
+  EMAIL_TAKEN: "Email already registered.",
+
+  OTP_SENT: "OTP sent to your email.",
 
   //TOKEN
   INVALID_TOKEN: "Invalid Token",
