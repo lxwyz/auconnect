@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import userRouter from "./routes/userRouter.js";
-
+import otpRouter from "./routes/otpRouter.js";
 // Utils
 import { globalErrorHandler } from "./utils/errorHandler.js";
 
@@ -18,7 +18,10 @@ app.use(express.json());
 app.use(cors());
 
 // API routes
-app.use("/api/user", userRouter);
+
+app.use("/api/user", userRouter); //  User
+
+app.use("/api/otp", otpRouter); // OTP
 
 // Handle Generic Error
 app.use(globalErrorHandler);

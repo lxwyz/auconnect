@@ -17,7 +17,7 @@ const messages = {
   // Email
   EMAIL_TAKEN: "Email already registered.",
 
-  OTP_SENT: "OTP sent to your email.",
+  OTP_SENT: "OTP SENT Sucessfully.",
 
   //TOKEN
   INVALID_TOKEN: "Invalid Token",

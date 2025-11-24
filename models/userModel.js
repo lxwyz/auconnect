@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    userId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     studentId: {
       type: String,
       required: true,
@@ -40,17 +45,20 @@ const userSchema = new mongoose.Schema(
     // year: { type: Number, required: true },
     // createdAt: Date,
     // updatedAt: Date,
-    otp: String,
-    otpExpiry: Date,
     role: {
       type: String,
       enum: ["Admin", "User"],
       default: "User",
     },
     status: { type: String, enum: ["Pending", "Active"], default: "Pending" },
+    isVerify: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   { timestamps: true }
 );
 
-export default mongoose.model("User", userSchema);
+const userModel = mongoose.model("User", userSchema);
+export default userModel;

@@ -3,10 +3,10 @@ import express from "express";
 //Controller
 import {
   registerUser,
-  verifyOtp,
+  // verifyOtp,
   login,
   getUser,
-  getUsers,
+  // getUsers,
 } from "../controllers/userController.js";
 
 // MiddleWares
@@ -40,10 +40,9 @@ console.log("✅ router loaded");
 // });
 
 useRouter.post("/register", registerUser);
-useRouter.post("/verify-otp", verifyOtp);
 useRouter.post("/login", login);
 
-useRouter.get("/", isAuth, isAdmin, getUsers);
+// useRouter.get("/",isAdmin, getUsers);
 useRouter.get("/:id", isAuth, getUser);
 
 // User Auth Require Routes
