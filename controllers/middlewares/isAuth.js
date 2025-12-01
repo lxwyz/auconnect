@@ -6,13 +6,31 @@ import messages from "../../utils/messages.js";
 
 const isAuth = async (req, res, next) => {
   try {
-    const { token } = req.body;
-    if (!token) return sendError(res, messages.MISSING_TOKEN, 401);
+    const { token, userId } = req.body;
 
-    const token_decode = jwt.verify(token, process.env.JWT_SECRET);
-    if (!req.params.id == token_decode.id)
+    let token_decode;
+    try {
+      token_decode = await jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === "JsonWebTokenError") {
+        return sendError(res, messages.INVALID_TOKEN, 401, {
+          reason: "Invalid JWT signature.",
+        });
+      }
+
+      // Token expired
+      if (err.name === "TokenExpiredError") {
+        return sendError(res, messages.EXPIRE_TOKEN, 401);
+      }
+
+      // Other verify errors
       return sendError(res, messages.INVALID_TOKEN, 401);
+    }
 
+    if (userId !== token_decode.userId)
+      return sendError(res, messages.INVALID_TOKEN, 401, {
+        reason: "User ID Not Match",
+      });
     next();
   } catch (error) {
     console.error(error);
